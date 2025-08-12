@@ -1,0 +1,99 @@
+{% extends 'showcase/base.html' %}
+{% block title %}Projects - My Portfolio{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Projects</h1>
+
+<!-- Search + Tag Filter -->
+<form method="get" class="row g-2 mb-4">
+  <div class="col-md-8">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by title, tech, or description">
+  </div>
+  <div class="col-md-4 d-grid">
+    <button class="btn btn-dark" type="submit">Search</button>
+  </div>
+</form>
+
+<div class="mb-3">
+  <a href="?" class="badge rounded-pill text-bg-secondary me-1 {% if not active_tag %}text-bg-dark{% endif %}">All</a>
+  {% for tag in tags %}
+    <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}tag={{ tag.name|urlencode }}"
+       class="badge rounded-pill text-bg-secondary me-1 {% if active_tag and active_tag.id == tag.id %}text-bg-dark{% endif %}">
+      {{ tag.name }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Projects Grid -->
+<div class="row">
+  {% for project in page_obj.object_list %}
+  <div class="col-md-4">
+    <div class="card mb-4 shadow-sm h-100">
+      <a href="#" data-bs-toggle="modal" data-bs-target="#imgModal{{ project.id }}">
+        <img src="{{ project.image.url }}" alt="{{ project.title }}" class="card-img-top" loading="lazy">
+      </a>
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex align-items-start justify-content-between">
+          <h5 class="card-title">{{ project.title }}</h5>
+          {% if project.featured %}
+            <span class="badge text-bg-warning">Featured</span>
+          {% endif %}
+        </div>
+        <p class="card-text mt-1">{{ project.description|truncatewords:25 }}</p>
+        <div class="mb-2">
+          {% for tag in project.tags.all %}
+            <span class="badge text-bg-light border me-1">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+        <div class="mt-auto d-flex gap-2">
+          <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-dark btn-sm">Details</a>
+          {% if project.live_link %}
+            <a href="{{ project.live_link }}" target="_blank" class="btn btn-dark btn-sm">Live</a>
+          {% endif %}
+          {% if project.code_link %}
+            <a href="{{ project.code_link }}" target="_blank" class="btn btn-outline-secondary btn-sm">Code</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal (lightbox) -->
+  <div class="modal fade" id="imgModal{{ project.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark">
+        <button type="button" class="btn-close btn-close-white ms-auto me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
+        <img src="{{ project.image.url }}" alt="{{ project.title }}" class="img-fluid rounded-bottom">
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-center">No projects found. Try a different search or clear filters.</p>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Projects pagination">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_tag %}tag={{ active_tag.name|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_tag %}tag={{ active_tag.name|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endblock %}
