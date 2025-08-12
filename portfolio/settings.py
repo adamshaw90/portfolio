@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'showcase',
 ]
 
-TEst
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
